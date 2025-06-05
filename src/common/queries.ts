@@ -1,5 +1,5 @@
 // GraphQL Fragments
-const columnValuesFragment = `
+export const columnValuesFragment = `
 fragment ColumnValuesFragment on ColumnValue 
 {
     id
@@ -142,9 +142,9 @@ export const mondayGraphQLQueries = {
             ...UserFragment
         }
     }`,
-    getItemColumnValues: `
+    getItem: `
     ${columnValuesFragment}
-    query getItemColumnValues($itemId: ID!, $columnIds: [String!])
+    query getItem($itemId: ID!, $columnIds: [String!])
     {
         items(ids: [$itemId]) {
             id
@@ -155,7 +155,7 @@ export const mondayGraphQLQueries = {
             }
         }
     }`,
-    getSubitemsColumnValues: `
+    listSubitems: `
     ${columnValuesFragment}
     query getSubitemsColumnValues($itemId: ID!, $columnIds: [String!])
     {
@@ -171,7 +171,7 @@ export const mondayGraphQLQueries = {
             }
         }
     }`,
-    getItemsByColumnValues: `
+    listItemsByColumnValues: `
     ${columnValuesFragment}
     query getItemsByColumnValues(
         $limit: Int,

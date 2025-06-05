@@ -20,12 +20,12 @@ export class WorkspaceService {
     }
 
     async listWorkspaceBoards(params: ListWorkspaceBoardsParams): Promise<Board[]> {
-        if (!params.workspaceId) throw new Error("Workspace ID is required")
+        if (!params.workspaceId) throw new Error("🚨 'workspaceId' is required")
 
         const response = await this.baseClient.api<{ boards: Board[] }>(
             {
                 query: mondayGraphQLQueries.listWorkspaceBoards,
-                variables: { workspaceId: params.workspaceId }
+                variables: params
             }
         )
         

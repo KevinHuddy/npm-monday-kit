@@ -3,36 +3,36 @@ import { mondayGraphQLQueries } from "../common/queries"
 import { Column, Group } from "../common/models"
 
 export interface ListBoardColumnsParams {
-    id: string
+    boardId: string
 }
 
 export interface ListBoardGroupsParams {
-    id: string
+    boardId: string
 }
 
 export class BoardService {
     constructor(private baseClient: Client) {}
 
-    async listBoardColumns(params: ListBoardColumnsParams): Promise<Column[]> {
-        if (!params.id) throw new Error("Board ID is required")
+    async listBoardColumns(variables: ListBoardColumnsParams): Promise<Column[]> {
+        if (!variables.boardId) throw new Error("🚨 'boardId' is required")
 
         const response = await this.baseClient.api<{ boards: { columns: Column[] }[] }>(
             {
                 query: mondayGraphQLQueries.listBoardColumns,
-                variables: { boardId: params.id }
+                variables
             }
         )
 
         return response.boards[0]?.columns || []
     }
 
-    async listBoardGroups(params: ListBoardGroupsParams): Promise<Group[]> {
-        if (!params.id) throw new Error("Board ID is required")
+    async listBoardGroups(variables: ListBoardGroupsParams): Promise<Group[]> {
+        if (!variables.boardId) throw new Error("🚨 'boardId' is required")
 
         const response = await this.baseClient.api<{ boards: { groups: Group[] }[] }>(
             {
                 query: mondayGraphQLQueries.listBoardGroups,
-                variables: { boardId: params.id }
+                variables
             }
         )
 

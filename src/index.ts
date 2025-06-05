@@ -1,56 +1,63 @@
 import { ApiParams, Client } from "./common/client"
-import { CreateItemParams, GetItemParams, GetItemsByColumnValuesParams, ItemService, UpdateItemParams } from "./services/item-service"
-import { GetSubitemsParams, SubitemService } from "./services/subitem-service"
+import { CreateItemParams, GetItemParams, ListItemsByColumnValuesParams, ItemService, UpdateItemParams } from "./services/item-service"
+import { CreateSubitemParams, ListSubitemsParams, SubitemService } from "./services/subitem-service"
 import { BoardService, ListBoardColumnsParams, ListBoardGroupsParams } from "./services/board-service"
 import { ListWorkspaceBoardsParams, WorkspaceService } from "./services/workspace-service"
 import { GetUserByEmailParams, GetUserByIdParams, UserService } from "./services/user-service"
 import { CreateUpdateParams, UpdateService } from "./services/update-service"
 
 export class MondayClient {
-    private baseClient: Client
+    protected baseClient: Client
     
-    public readonly items: ItemService
-    public readonly boards: BoardService
-    public readonly workspaces: WorkspaceService
-    public readonly users: UserService
-    public readonly updates: UpdateService
-    public readonly subitems: SubitemService
+    public readonly item: ItemService
+    public readonly board: BoardService
+    public readonly workspace: WorkspaceService
+    public readonly user: UserService
+    public readonly update: UpdateService
+    public readonly subitem: SubitemService
 
     constructor(apiKey: string, apiVersion: string = "2025-04") {
         this.baseClient = new Client(apiKey, apiVersion)
-        this.items = new ItemService(this.baseClient)
-        this.subitems = new SubitemService(this.baseClient)
-        this.boards = new BoardService(this.baseClient)
-        this.workspaces = new WorkspaceService(this.baseClient)
-        this.users = new UserService(this.baseClient)
-        this.updates = new UpdateService(this.baseClient)
+        this.item = new ItemService(this.baseClient)
+        this.subitem = new SubitemService(this.baseClient)
+        this.board = new BoardService(this.baseClient)
+        this.workspace = new WorkspaceService(this.baseClient)
+        this.user = new UserService(this.baseClient)
+        this.update = new UpdateService(this.baseClient)
     }
 
     // Base Client
     api = async <T>(params: ApiParams) => this.baseClient.api<T>(params)
 
-    // Item Service
-    getItem = async (params: GetItemParams) => this.items.getItem(params)
-    updateItem = async (params: UpdateItemParams) => this.items.updateItem(params)
-    createItem = async (params: CreateItemParams) => this.items.createItem(params)
-    getItemsByColumnValues = async (params: GetItemsByColumnValuesParams) => this.items.getItemsByColumnValues(params)
+    items = {
+        get: async (params: GetItemParams) => this.item.getItem(params),
+        update: async (params: UpdateItemParams) => this.item.updateItem(params),
+        create: async (params: CreateItemParams) => this.item.createItem(params),
+        listByColumnValues: async (params: ListItemsByColumnValuesParams) => this.item.listItemsByColumnValues(params)
+    }
 
-    // Subitem Service
-    getSubitems = async (params: GetSubitemsParams) => this.subitems.getSubitems(params)
+    subitems = {
+        list: async (params: ListSubitemsParams) => this.subitem.listSubitems(params),
+        create: async (params: CreateSubitemParams) => this.subitem.createSubitem(params)
+    }
 
-    // Update Service
-    createUpdate = async (params: CreateUpdateParams) => this.updates.createUpdate(params)
+    updates = {
+        create: async (params: CreateUpdateParams) => this.update.createUpdate(params)
+    }
 
-    // User Service
-    listUsers = async () => this.users.listUsers()
-    getUserById = async (params: GetUserByIdParams) => this.users.getUserById(params)
-    getUserByEmail = async (params: GetUserByEmailParams) => this.users.getUserByEmail(params)
+    users = {
+        list: async () => this.user.listUsers(),
+        getById: async (params: GetUserByIdParams) => this.user.getUserById(params),
+        getByEmail: async (params: GetUserByEmailParams) => this.user.getUserByEmail(params)
+    }
 
-    // Workspace Service
-    listWorkspaces = async () => this.workspaces.listWorkspaces()
-    listWorkspaceBoards = async (params: ListWorkspaceBoardsParams) => this.workspaces.listWorkspaceBoards(params)
-    
-    // Board Service
-    listBoardColumns = async (params: ListBoardColumnsParams) => this.boards.listBoardColumns(params)
-    listBoardGroups = async (params: ListBoardGroupsParams) => this.boards.listBoardGroups(params)
+    workspaces = {
+        list: async () => this.workspace.listWorkspaces(),
+        listBoards: async (params: ListWorkspaceBoardsParams) => this.workspace.listWorkspaceBoards(params)
+    }
+
+    boards = {
+        listColumns: async (params: ListBoardColumnsParams) => this.board.listBoardColumns(params),
+        listGroups: async (params: ListBoardGroupsParams) => this.board.listBoardGroups(params)
+    }
 }

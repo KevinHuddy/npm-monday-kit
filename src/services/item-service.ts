@@ -4,11 +4,14 @@ import { mondayGraphQLMutations } from "../common/mutations"
 import { Column, Item } from "../common/models"
 import { convertValueToMondayValue, generateColumnIdTypeMap, parseMondayColumnValue } from "../common/helper"
 
+export interface ListBoardColumnsParams {
+    boardId: string
+}
 export interface GetItemParams {
-    id: string,
+    itemId: string,
     columnIds?: string[]
 }
-export interface GetItemsByColumnValuesParams {
+export interface ListItemsByColumnValuesParams {
     boardId: string,
     columns: Record<string, string | string[]>,
     limit?: number,
@@ -22,7 +25,7 @@ export interface CreateItemParams {
     createLabels?: boolean
 }
 export interface UpdateItemParams {
-    id: string,
+    itemId: string,
     columnValues: Record<string, any>,
     boardId: string,
     createLabels?: boolean
@@ -35,15 +38,12 @@ export class ItemService {
     constructor(private baseClient: Client) {}
 
     async getItem(params: GetItemParams): Promise<Items> {
-        if (!params.id) throw new Error("Item ID is required")
+        if (!params.itemId) throw new Error("🚨 'itemId' is required")
             
         const response = await this.baseClient.api<{ items: Item[] }>(
             {
-                query: mondayGraphQLQueries.getItemColumnValues,
-                variables: {
-                    itemId: params.id,
-                    columnIds: params.columnIds
-                }
+                query: mondayGraphQLQueries.getItem,
+                variables: params
             }
         )
         const items = response.items || []
@@ -51,8 +51,8 @@ export class ItemService {
     }
     
     async createItem(params: CreateItemParams): Promise<string> {
-        if (!params.itemName) throw new Error("Item name is required")
-        if (!params.boardId) throw new Error("Board ID is required")
+        if (!params.itemName) throw new Error("🚨 'itemName' is required")
+        if (!params.boardId) throw new Error("🚨 'boardId' is required")
 
         const mondayColumnValues = await this.processColumnValues(
             params.boardId, 
@@ -67,7 +67,7 @@ export class ItemService {
                     boardId: params.boardId,
                     groupId: params.groupId,
                     columnValues: JSON.stringify(mondayColumnValues),
-                    createLabels: params.createLabels || false
+                    createLabels: params.createLabels ?? false
                 }
             }
         )
@@ -75,9 +75,9 @@ export class ItemService {
     }
 
     async updateItem(params: UpdateItemParams): Promise<string> {
-        if (!params.id) throw new Error("Item ID is required")
-        if (!params.columnValues) throw new Error("Column values are required")
-        if (!params.boardId) throw new Error("Board ID is required")
+        if (!params.itemId) throw new Error("🚨 'itemId' is required")
+        if (!params.columnValues) throw new Error("🚨 'columnValues' is required")
+        if (!params.boardId) throw new Error("🚨 'boardId' is required")
 
         const mondayColumnValues = await this.processColumnValues(
             params.boardId, 
@@ -88,23 +88,23 @@ export class ItemService {
             {
                 query: mondayGraphQLMutations.updateItem,
                 variables: {
-                    itemId: params.id,
+                    itemId: params.itemId,
                     boardId: params.boardId,
                     columnValues: JSON.stringify(mondayColumnValues),
-                    createLabels: params.createLabels || false
+                    createLabels: params.createLabels  ?? false
                 }
             }
         )
         return response.change_multiple_column_values.id
     }
 
-    async getItemsByColumnValues(params: GetItemsByColumnValuesParams): Promise<Items> {
-        if (!params.boardId) throw new Error("Board ID is required")
-        if (!params.columns) throw new Error("Columns are required")
+    async listItemsByColumnValues(params: ListItemsByColumnValuesParams): Promise<Items> {
+        if (!params.boardId) throw new Error("🚨 'boardId' is required")
+        if (!params.columns) throw new Error("🚨 'columns' is required")
             
         const response = await this.baseClient.api<{ items_page_by_column_values: { items: Item[] } }>(
             {
-                query: mondayGraphQLQueries.getItemsByColumnValues,
+                query: mondayGraphQLQueries.listItemsByColumnValues,
                 variables: {
                     boardId: params.boardId,
                     columns: Object.entries(params.columns).map(([columnId, value]) => ({
@@ -142,20 +142,20 @@ export class ItemService {
     /**
      * Gets board columns with caching to reduce API calls
      */
-    private async getBoardColumns(boardId: string): Promise<Column[]> {
-        if (this.boardColumnsCache.has(boardId)) {
-            return this.boardColumnsCache.get(boardId)!
+    private async listBoardColumns(params: ListBoardColumnsParams): Promise<Column[]> {
+        if (this.boardColumnsCache.has(params.boardId)) {
+            return this.boardColumnsCache.get(params.boardId)!
         }
 
         const response = await this.baseClient.api<{ boards: { columns: Column[] }[] }>(
             {
                 query: mondayGraphQLQueries.listBoardColumns,
-                variables: { boardId }
+                variables: params
             }
         )
         
         const columns = response.boards[0]?.columns || []
-        this.boardColumnsCache.set(boardId, columns)
+        this.boardColumnsCache.set(params.boardId, columns)
         return columns
     }
 
@@ -170,7 +170,7 @@ export class ItemService {
             return {}
         }
 
-        const columns = await this.getBoardColumns(boardId)
+        const columns = await this.listBoardColumns({ boardId })
         const columnIdTypeMap = generateColumnIdTypeMap(columns)
         
         // Validate column IDs and log warnings for non-existent ones
@@ -217,4 +217,4 @@ export class ItemService {
             this.boardColumnsCache.clear()
         }
     }
-} 
+}

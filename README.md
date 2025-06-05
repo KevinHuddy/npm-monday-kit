@@ -30,8 +30,8 @@ import { MondayClient } from '@ntr.dev/monday-kit';
 const monday = new MondayClient('your-monday-api-token');
 
 // Get item with transformed column values
-const items = await monday.getItem({ 
-  id: "item-id", 
+const items = await monday.item.getItem({ 
+  itemId: "item-id", 
   columnIds: ["status", "person", "date"] // optional - get specific columns
 });
 
@@ -56,25 +56,25 @@ const monday = new MondayClient(process.env.MONDAY_API_TOKEN);
 
 The `MondayClient` provides access to six main services:
 
-- **`items`** - Item operations (create, read, update, search)
-- **`boards`** - Board information (columns, groups)
-- **`workspaces`** - Workspace and board listing
-- **`users`** - User management and lookup
-- **`updates`** - Item updates and comments
-- **`subitems`** - Subitem operations
+- **`item`** - Item operations (create, read, update, search)
+- **`board`** - Board information (columns, groups)
+- **`workspace`** - Workspace and board listing
+- **`user`** - User management and lookup
+- **`update`** - Item updates and comments
+- **`subitem`** - Subitem operations
 
 ---
 
 ## 📋 Items Service
 
-### `getItem(params)`
+### `item.getItem(params)`
 
 Retrieve a single item with all its column values (parsed and transformed).
 
 **Parameters:**
 ```typescript
 {
-  id: string,           // Monday.com item ID
+  itemId: string,       // Monday.com item ID
   columnIds?: string[]  // Optional: specific column IDs to fetch
 }
 ```
@@ -83,8 +83,8 @@ Retrieve a single item with all its column values (parsed and transformed).
 
 **Example:**
 ```typescript
-const items = await monday.getItem({ 
-  id: "1234567890",
+const items = await monday.item.getItem({ 
+  itemId: "1234567890",
   columnIds: ["status", "person", "date"]
 });
 
@@ -100,7 +100,7 @@ const items = await monday.getItem({
 // ]
 ```
 
-### `createItem(params)`
+### `item.createItem(params)`
 
 Create a new item on a Monday.com board.
 
@@ -119,7 +119,7 @@ Create a new item on a Monday.com board.
 
 **Example:**
 ```typescript
-const itemId = await monday.createItem({
+const itemId = await monday.item.createItem({
   itemName: "New Task",
   boardId: "123456789",
   groupId: "topics",
@@ -133,14 +133,14 @@ const itemId = await monday.createItem({
 });
 ```
 
-### `updateItem(params)`
+### `item.updateItem(params)`
 
 Update column values for an existing item.
 
 **Parameters:**
 ```typescript
 {
-  id: string,                          // Item ID to update
+  itemId: string,                      // Item ID to update
   columnValues: Record<string, any>,   // Column values to update
   boardId: string,                     // Board ID (required for validation)
   createLabels?: boolean               // Optional: Auto-create missing status labels; (default: false)
@@ -151,8 +151,8 @@ Update column values for an existing item.
 
 **Example:**
 ```typescript
-const itemId = await monday.updateItem({
-  id: "1234567890",
+const itemId = await monday.item.updateItem({
+  itemId: "1234567890",
   boardId: "123456789",
   columnValues: {
     status: "Done",
@@ -162,7 +162,7 @@ const itemId = await monday.updateItem({
 });
 ```
 
-### `getItemsByColumnValues(params)`
+### `item.listItemsByColumnValues(params)`
 
 Search for items by specific column values.
 
@@ -180,7 +180,7 @@ Search for items by specific column values.
 
 **Example:**
 ```typescript
-const items = await monday.getItemsByColumnValues({
+const items = await monday.item.listItemsByColumnValues({
   boardId: "123456789",
   columns: {
     status: "Working on it",
@@ -195,14 +195,14 @@ const items = await monday.getItemsByColumnValues({
 
 ## 📊 Boards Service
 
-### `listBoardColumns(params)`
+### `board.listBoardColumns(params)`
 
 Get all columns for a specific board.
 
 **Parameters:**
 ```typescript
 {
-  id: string  // Board ID
+  boardId: string  // Board ID
 }
 ```
 
@@ -210,7 +210,7 @@ Get all columns for a specific board.
 
 **Example:**
 ```typescript
-const columns = await monday.listBoardColumns({ id: "123456789" });
+const columns = await monday.board.listBoardColumns({ boardId: "123456789" });
 
 // Result:
 // [
@@ -220,14 +220,14 @@ const columns = await monday.listBoardColumns({ id: "123456789" });
 // ]
 ```
 
-### `listBoardGroups(params)`
+### `board.listBoardGroups(params)`
 
 Get all groups for a specific board.
 
 **Parameters:**
 ```typescript
 {
-  id: string  // Board ID
+  boardId: string  // Board ID
 }
 ```
 
@@ -235,14 +235,14 @@ Get all groups for a specific board.
 
 **Example:**
 ```typescript
-const groups = await monday.listBoardGroups({ id: "123456789" });
+const groups = await monday.board.listBoardGroups({ boardId: "123456789" });
 ```
 
 ---
 
 ## 🏢 Workspaces Service
 
-### `listWorkspaces()`
+### `workspace.listWorkspaces()`
 
 Get all workspaces accessible to the current user.
 
@@ -252,10 +252,10 @@ Get all workspaces accessible to the current user.
 
 **Example:**
 ```typescript
-const workspaces = await monday.listWorkspaces();
+const workspaces = await monday.workspace.listWorkspaces();
 ```
 
-### `listWorkspaceBoards(params)`
+### `workspace.listWorkspaceBoards(params)`
 
 Get all boards in a specific workspace.
 
@@ -270,7 +270,7 @@ Get all boards in a specific workspace.
 
 **Example:**
 ```typescript
-const boards = await monday.listWorkspaceBoards({ 
+const boards = await monday.workspace.listWorkspaceBoards({ 
   workspaceId: "12345" 
 });
 ```
@@ -279,7 +279,7 @@ const boards = await monday.listWorkspaceBoards({
 
 ## 👥 Users Service
 
-### `listUsers()`
+### `user.listUsers()`
 
 Get all users in the account.
 
@@ -289,17 +289,17 @@ Get all users in the account.
 
 **Example:**
 ```typescript
-const users = await monday.listUsers();
+const users = await monday.user.listUsers();
 ```
 
-### `getUserById(params)`
+### `user.getUserById(params)`
 
 Get a specific user by their ID.
 
 **Parameters:**
 ```typescript
 {
-  id: string  // User ID
+  userId: string  // User ID
 }
 ```
 
@@ -307,10 +307,10 @@ Get a specific user by their ID.
 
 **Example:**
 ```typescript
-const user = await monday.getUserById({ id: "12345" });
+const user = await monday.user.getUserById({ userId: "12345" });
 ```
 
-### `getUserByEmail(params)`
+### `user.getUserByEmail(params)`
 
 Get a specific user by their email address.
 
@@ -325,7 +325,7 @@ Get a specific user by their email address.
 
 **Example:**
 ```typescript
-const user = await monday.getUserByEmail({ 
+const user = await monday.user.getUserByEmail({ 
   email: "user@company.com" 
 });
 ```
@@ -334,15 +334,15 @@ const user = await monday.getUserByEmail({
 
 ## 💬 Updates Service
 
-### `createUpdate(params)`
+### `update.createUpdate(params)`
 
 Create an update (comment) on an item.
 
 **Parameters:**
 ```typescript
 {
-  id: string,    // Item ID
-  body: string   // Update content
+  itemId: string,      // Item ID
+  updateBody: string   // Update content
 }
 ```
 
@@ -350,9 +350,9 @@ Create an update (comment) on an item.
 
 **Example:**
 ```typescript
-const updateId = await monday.createUpdate({
-  id: "1234567890",
-  body: "Task completed successfully!"
+const updateId = await monday.update.createUpdate({
+  itemId: "1234567890",
+  updateBody: "Task completed successfully!"
 });
 ```
 
@@ -360,14 +360,14 @@ const updateId = await monday.createUpdate({
 
 ## 📎 Subitems Service
 
-### `getSubitems(params)`
+### `subitem.listSubitems(params)`
 
 Get all subitems for a parent item.
 
 **Parameters:**
 ```typescript
 {
-  id: string,           // Parent item ID
+  itemId: string,       // Parent item ID
   columnIds?: string[]  // Optional: specific columns to fetch
 }
 ```
@@ -376,9 +376,38 @@ Get all subitems for a parent item.
 
 **Example:**
 ```typescript
-const subitems = await monday.getSubitems({ 
-  id: "1234567890",
+const subitems = await monday.subitem.listSubitems({ 
+  itemId: "1234567890",
   columnIds: ["status", "person"]
+});
+```
+
+### `subitem.createSubitem(params)`
+
+Create a new subitem under a parent item.
+
+**Parameters:**
+```typescript
+{
+  itemName: string,                    // Name of the new subitem
+  parentItemId: string,                // Parent item ID
+  columnValues?: Record<string, any>,  // Optional: Column values to set
+  createLabels?: boolean               // Optional: Auto-create missing status labels; (default: false)
+}
+```
+
+**Returns:** `Promise<string>` - Created subitem ID
+
+**Example:**
+```typescript
+const subitemId = await monday.subitem.createSubitem({
+  itemName: "New Subtask",
+  parentItemId: "1234567890",
+  columnValues: {
+    status: "Working on it",
+    person: [12345]
+  },
+  createLabels: true
 });
 ```
 
@@ -435,8 +464,8 @@ export default defineComponent({
     const monday = new MondayClient(this.monday_api_token);
     
     // Example: Get item and transform data
-    const items = await monday.getItem({ 
-      id: steps.trigger.event.itemId,
+    const items = await monday.item.getItem({ 
+      itemId: steps.trigger.event.itemId,
       columnIds: ["status", "person", "date"]
     });
     
@@ -459,8 +488,8 @@ export default defineComponent({
     const webhookData = steps.trigger.event;
     
     if (webhookData.event.type === 'create_item') {
-      const items = await monday.getItem({ 
-        id: webhookData.event.itemId 
+      const items = await monday.item.getItem({ 
+        itemId: webhookData.event.itemId 
       });
       
       // Process the transformed data
@@ -478,7 +507,7 @@ export default defineComponent({
     const monday = new MondayClient(this.monday_api_token);
     
     try {
-      const items = await monday.getItem({ id: "invalid-id" });
+      const items = await monday.item.getItem({ itemId: "invalid-id" });
       return { success: true, data: items };
     } catch (error) {
       // Pipedream will catch and display this error
@@ -490,14 +519,26 @@ export default defineComponent({
 
 ## 🛠️ Advanced Usage
 
+### Legacy Method Support
+
+For backward compatibility, the original method structure is still available:
+
+```typescript
+// New service-based approach (recommended)
+const items = await monday.item.getItem({ itemId: "123" });
+
+// Legacy method approach (still supported)
+const items = await monday.items.get({ itemId: "123" });
+```
+
 ### Caching Control
 
 ```typescript
-// Clear cache for a specific board
-monday.items.clearCache("board-id");
+// Clear cache for a specific board (available on ItemService and SubitemService)
+monday.item.clearCache("board-id");
 
 // Clear all cached data
-monday.items.clearCache();
+monday.item.clearCache();
 ```
 
 ### Direct API Access
@@ -515,9 +556,9 @@ const response = await monday.api({
 ```typescript
 // Create multiple items efficiently
 const itemIds = await Promise.all([
-  monday.createItem({ itemName: "Task 1", boardId: "123" }),
-  monday.createItem({ itemName: "Task 2", boardId: "123" }),
-  monday.createItem({ itemName: "Task 3", boardId: "123" })
+  monday.item.createItem({ itemName: "Task 1", boardId: "123" }),
+  monday.item.createItem({ itemName: "Task 2", boardId: "123" }),
+  monday.item.createItem({ itemName: "Task 3", boardId: "123" })
 ]);
 ```
 
@@ -527,9 +568,9 @@ The library provides comprehensive error handling:
 
 ```typescript
 try {
-  const items = await monday.getItem({ id: "item-id" });
+  const items = await monday.item.getItem({ itemId: "item-id" });
 } catch (error) {
-  if (error.message.includes('Item ID is required')) {
+  if (error.message.includes('itemId is required')) {
     // Handle validation error
   } else if (error.message.includes('API')) {
     // Handle API error
@@ -545,7 +586,7 @@ Full TypeScript definitions are included:
 import { MondayClient, Items, Column, User } from '@ntr.dev/monday-kit';
 
 const monday: MondayClient = new MondayClient(token);
-const items: Items = await monday.getItem({ id: "123" });
+const items: Items = await monday.item.getItem({ itemId: "123" });
 ```
 
 ## 📈 Performance Tips

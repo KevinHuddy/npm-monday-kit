@@ -2,10 +2,17 @@ import { Client } from "../common/client"
 import { mondayGraphQLQueries } from "../common/queries"
 import { Column, Item } from "../common/models"
 import { convertValueToMondayValue, generateColumnIdTypeMap, parseMondayColumnValue } from "../common/helper"
+import { mondayGraphQLMutations } from "../common/mutations"
 
-export interface GetSubitemsParams {
-    id: string,
+export interface ListSubitemsParams {
+    itemId: string,
     columnIds?: string[]
+}
+export interface CreateSubitemParams {
+    itemName: string,
+    parentItemId: string,
+    columnValues?: Record<string, any>,
+    createLabels?: boolean
 }
 
 export type Subitems = Record<string, any>[]
@@ -34,7 +41,7 @@ export class SubitemService {
             return {}
         }
 
-        const columns = await this.getBoardColumns(boardId)
+        const columns = await this.listBoardColumns(boardId)
         const columnIdTypeMap = generateColumnIdTypeMap(columns)
         
         // Validate column IDs and log warnings for non-existent ones
@@ -60,7 +67,7 @@ export class SubitemService {
     /**
      * Gets board columns with caching to reduce API calls
      */
-    private async getBoardColumns(boardId: string): Promise<Column[]> {
+    private async listBoardColumns(boardId: string): Promise<Column[]> {
         if (this.boardColumnsCache.has(boardId)) {
             return this.boardColumnsCache.get(boardId)!
         }
@@ -77,16 +84,13 @@ export class SubitemService {
         return columns
     }
 
-    async getSubitems(params: GetSubitemsParams): Promise<Subitems> {
-        if (!params.id) throw new Error("Parent item ID is required")
+    async listSubitems(params: ListSubitemsParams): Promise<Subitems> {
+        if (!params.itemId) throw new Error("🚨 'itemId' is required")
 
         const response = await this.baseClient.api<{ items: Item[] }>(
             {
-                query: mondayGraphQLQueries.getSubitemsColumnValues,
-                variables: {
-                    itemId: params.id,
-                    columnIds: params.columnIds
-                }
+                query: mondayGraphQLQueries.listSubitems,
+                variables: params
             }
         )
         
@@ -104,6 +108,29 @@ export class SubitemService {
             result.push(transformedValues)
         }
         return result;
+    }
+
+    async createSubitem(params: CreateSubitemParams): Promise<string> {
+        if (!params.itemName) throw new Error("🚨 'itemName' is required")
+        if (!params.parentItemId) throw new Error("🚨 'parentItemId' is required")
+
+        const mondayColumnValues = await this.processColumnValues(
+            params.parentItemId, 
+            params.columnValues || {}
+        )
+
+        const response = await this.baseClient.api<{ create_item: { id: string } }>(
+            {
+                query: mondayGraphQLMutations.createSubitem,
+                variables: {
+                    itemName: params.itemName,
+                    parentItemId: params.parentItemId,
+                    columnValues: JSON.stringify(mondayColumnValues),
+                    createLabels: params.createLabels ?? false
+                }
+            }
+        )
+        return response.create_item.id
     }
     
 } 
