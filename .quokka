@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    "dotenv-quokka-plugin"
+  ],
+  "dotenv": {
+    "path": ".env.local"
+  },
+  "bun": {
+    "usageMode": "neverUse"
+  }
+}

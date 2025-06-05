@@ -1,0 +1,220 @@
+import { Client } from "../common/client"
+import { mondayGraphQLQueries } from "../common/queries"
+import { mondayGraphQLMutations } from "../common/mutations"
+import { Column, Item } from "../common/models"
+import { convertValueToMondayValue, generateColumnIdTypeMap, parseMondayColumnValue } from "../common/helper"
+
+export interface GetItemParams {
+    id: string,
+    columnIds?: string[]
+}
+export interface GetItemsByColumnValuesParams {
+    boardId: string,
+    columns: Record<string, string | string[]>,
+    limit?: number,
+    columnIds?: string[]
+}
+export interface CreateItemParams {
+    itemName: string,
+    boardId: string,
+    groupId?: string,
+    columnValues?: Record<string, any>,
+    createLabels?: boolean
+}
+export interface UpdateItemParams {
+    id: string,
+    columnValues: Record<string, any>,
+    boardId: string,
+    createLabels?: boolean
+}
+export type Items = Record<string, any>[]
+
+export class ItemService {
+    private boardColumnsCache = new Map<string, Column[]>()
+
+    constructor(private baseClient: Client) {}
+
+    async getItem(params: GetItemParams): Promise<Items> {
+        if (!params.id) throw new Error("Item ID is required")
+            
+        const response = await this.baseClient.api<{ items: Item[] }>(
+            {
+                query: mondayGraphQLQueries.getItemColumnValues,
+                variables: {
+                    itemId: params.id,
+                    columnIds: params.columnIds
+                }
+            }
+        )
+        const items = response.items || []
+        return this.transformItems(items)
+    }
+    
+    async createItem(params: CreateItemParams): Promise<string> {
+        if (!params.itemName) throw new Error("Item name is required")
+        if (!params.boardId) throw new Error("Board ID is required")
+
+        const mondayColumnValues = await this.processColumnValues(
+            params.boardId, 
+            params.columnValues || {}
+        )
+
+        const response = await this.baseClient.api<{ create_item: { id: string } }>(
+            {
+                query: mondayGraphQLMutations.createItem,
+                variables: {
+                    itemName: params.itemName,
+                    boardId: params.boardId,
+                    groupId: params.groupId,
+                    columnValues: JSON.stringify(mondayColumnValues),
+                    createLabels: params.createLabels || false
+                }
+            }
+        )
+        return response.create_item.id
+    }
+
+    async updateItem(params: UpdateItemParams): Promise<string> {
+        if (!params.id) throw new Error("Item ID is required")
+        if (!params.columnValues) throw new Error("Column values are required")
+        if (!params.boardId) throw new Error("Board ID is required")
+
+        const mondayColumnValues = await this.processColumnValues(
+            params.boardId, 
+            params.columnValues
+        )
+
+        const response = await this.baseClient.api<{ change_multiple_column_values: { id: string } }>(
+            {
+                query: mondayGraphQLMutations.updateItem,
+                variables: {
+                    itemId: params.id,
+                    boardId: params.boardId,
+                    columnValues: JSON.stringify(mondayColumnValues),
+                    createLabels: params.createLabels || false
+                }
+            }
+        )
+        return response.change_multiple_column_values.id
+    }
+
+    async getItemsByColumnValues(params: GetItemsByColumnValuesParams): Promise<Items> {
+        if (!params.boardId) throw new Error("Board ID is required")
+        if (!params.columns) throw new Error("Columns are required")
+            
+        const response = await this.baseClient.api<{ items_page_by_column_values: { items: Item[] } }>(
+            {
+                query: mondayGraphQLQueries.getItemsByColumnValues,
+                variables: {
+                    boardId: params.boardId,
+                    columns: Object.entries(params.columns).map(([columnId, value]) => ({
+                        column_id: columnId,
+                        column_values: Array.isArray(value) ? value : [value]
+                    })),
+                    limit: params.limit,
+                    columnIds: params.columnIds
+                }
+            }
+        )
+
+        const items = response.items_page_by_column_values.items || []
+        return this.transformItems(items)
+    }
+
+    /**
+     * Transforms raw Monday.com items into a standardized format
+     */
+    private transformItems(items: Item[]): Items {
+        return items.map(item => {
+            const transformedValues: Record<string, any> = {
+                id: item.id,
+                name: item.name,
+            }
+            
+            for (const column of item.column_values) {
+                transformedValues[column.id] = parseMondayColumnValue(column)
+            }
+            
+            return transformedValues
+        })
+    }
+
+    /**
+     * Gets board columns with caching to reduce API calls
+     */
+    private async getBoardColumns(boardId: string): Promise<Column[]> {
+        if (this.boardColumnsCache.has(boardId)) {
+            return this.boardColumnsCache.get(boardId)!
+        }
+
+        const response = await this.baseClient.api<{ boards: { columns: Column[] }[] }>(
+            {
+                query: mondayGraphQLQueries.listBoardColumns,
+                variables: { boardId }
+            }
+        )
+        
+        const columns = response.boards[0]?.columns || []
+        this.boardColumnsCache.set(boardId, columns)
+        return columns
+    }
+
+    /**
+     * Processes and validates column values for create/update operations
+     */
+    private async processColumnValues(
+        boardId: string, 
+        columnValues: Record<string, any>
+    ): Promise<Record<string, any>> {
+        if (Object.keys(columnValues).length === 0) {
+            return {}
+        }
+
+        const columns = await this.getBoardColumns(boardId)
+        const columnIdTypeMap = generateColumnIdTypeMap(columns)
+        
+        // Validate column IDs and log warnings for non-existent ones
+        const { validKeys, invalidKeys } = this.validateColumnIds(columnValues, columnIdTypeMap)
+        
+        if (invalidKeys.length > 0) {
+            console.warn(`Invalid column IDs detected: ${invalidKeys.join(', ')}`)
+        }
+
+        // Process valid columns only
+        const mondayColumnValues: Record<string, any> = {}
+        for (const key of validKeys) {
+            const value = columnValues[key]
+            if (value !== '' && value != null) {
+                const columnType = columnIdTypeMap[key]
+                mondayColumnValues[key] = convertValueToMondayValue(columnType, value)
+            }
+        }
+
+        return mondayColumnValues
+    }
+
+    /**
+     * Validates column IDs against available board columns
+     */
+    private validateColumnIds(
+        columnValues: Record<string, any>, 
+        columnIdTypeMap: Record<string, string>
+    ): { validKeys: string[], invalidKeys: string[] } {
+        const allKeys = Object.keys(columnValues)
+        const validKeys = allKeys.filter(columnId => columnId in columnIdTypeMap)
+        const invalidKeys = allKeys.filter(columnId => !(columnId in columnIdTypeMap))
+        
+        return { validKeys, invalidKeys }
+    }
+
+    /**
+     * Clears the board columns cache for a specific board or all boards
+     */
+    public clearCache(boardId?: string): void {
+        if (boardId) {
+            this.boardColumnsCache.delete(boardId)
+        } else {
+            this.boardColumnsCache.clear()
+        }
+    }
+} 

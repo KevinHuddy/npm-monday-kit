@@ -1,0 +1,11 @@
+/src
+/node_modules
+/.vscode
+
+.env.local
+.DS_Store
+.quokka
+.gitignore
+
+tsconfig.json
+tsup.config.ts

@@ -1,0 +1,25 @@
+{
+    "name": "@ntr.dev/monday-kit",
+    "description": "A simplified wrapper for the Monday.com SDK with built-in column value parsing",
+    "version": "0.0.1",
+    "author": "NTR.DEV",
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsup",
+        "dev": "tsup --watch"
+    },
+    "license": "ISC",
+    "dependencies": {
+        "dayjs": "^1.11.13",
+        "monday-sdk-js": "^0.5.6"
+    },
+    "devDependencies": {
+        "@types/node": "^22.15.29",
+        "dotenv-quokka-plugin": "^1.0.0",
+        "tsup": "^8.5.0",
+        "typescript": "^5.8.3"
+    }
+}
