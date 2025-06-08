@@ -88,5 +88,13 @@ export const mondayGraphQLMutations = {
         ) {
             id
         }
+    }`,
+    deleteItem: `
+    mutation deleteItem(
+        $itemId: ID!
+    ) {
+        delete_item (item_id: $itemId) {
+            id
+        }
     }`
 }

@@ -1,7 +1,7 @@
 import { ApiParams, Client } from "./common/client"
-import { CreateItemParams, GetItemParams, ListItemsByColumnValuesParams, ItemService, UpdateItemParams } from "./services/item-service"
-import { CreateSubitemParams, ListSubitemsParams, SubitemService } from "./services/subitem-service"
-import { BoardService, ListBoardColumnsParams, ListBoardGroupsParams } from "./services/board-service"
+import { CreateItemParams, GetItemParams, ListItemsByColumnValuesParams, ItemService, UpdateItemParams, DeleteItemParams } from "./services/item-service"
+import { ListSubitemsParams, SubitemService } from "./services/subitem-service"
+import { BoardService, ListBoardColumnsParams, ListBoardGroupsParams, ListBoardItemsParams } from "./services/board-service"
 import { ListWorkspaceBoardsParams, WorkspaceService } from "./services/workspace-service"
 import { GetUserByEmailParams, GetUserByIdParams, UserService } from "./services/user-service"
 import { CreateUpdateParams, UpdateService } from "./services/update-service"
@@ -33,12 +33,12 @@ export class MondayClient {
         get: async (params: GetItemParams) => this.item.getItem(params),
         update: async (params: UpdateItemParams) => this.item.updateItem(params),
         create: async (params: CreateItemParams) => this.item.createItem(params),
-        listByColumnValues: async (params: ListItemsByColumnValuesParams) => this.item.listItemsByColumnValues(params)
+        listByColumnValues: async (params: ListItemsByColumnValuesParams) => this.item.listItemsByColumnValues(params),
+        delete: async (params: DeleteItemParams) => this.item.deleteItem(params)
     }
 
     subitems = {
-        list: async (params: ListSubitemsParams) => this.subitem.listSubitems(params),
-        create: async (params: CreateSubitemParams) => this.subitem.createSubitem(params)
+        list: async (params: ListSubitemsParams) => this.subitem.listSubitems(params)
     }
 
     updates = {
@@ -58,6 +58,7 @@ export class MondayClient {
 
     boards = {
         listColumns: async (params: ListBoardColumnsParams) => this.board.listBoardColumns(params),
-        listGroups: async (params: ListBoardGroupsParams) => this.board.listBoardGroups(params)
+        listGroups: async (params: ListBoardGroupsParams) => this.board.listBoardGroups(params),
+        listItems: async (params: ListBoardItemsParams) => this.board.listBoardItems(params)
     }
 }

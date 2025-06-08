@@ -90,6 +90,26 @@ export const mondayGraphQLQueries = {
             type
         }
     }`,
+    listBoardItems: `
+    ${columnValuesFragment}
+    query listBoardItems($boardId: ID!, $columnIds: [String!]) 
+    {
+        boards(ids: [$boardId])
+        {
+            items_page(limit: 500)
+            {
+                cursor
+                items {
+                    id
+                    name
+                    board { id }
+                    column_values(ids: $columnIds) {
+                        ...ColumnValuesFragment
+                    }
+                }
+            }
+        }
+    }`,
     listBoardGroups: `
     query listBoardGroups($boardId: ID!) 
     {

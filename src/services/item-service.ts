@@ -30,6 +30,9 @@ export interface UpdateItemParams {
     boardId: string,
     createLabels?: boolean
 }
+export interface DeleteItemParams {
+    itemId: string
+}
 export type Items = Record<string, any>[]
 
 export class ItemService {
@@ -72,6 +75,17 @@ export class ItemService {
             }
         )
         return response.create_item.id
+    }
+
+    async deleteItem(params: DeleteItemParams): Promise<string> {
+        if (!params.itemId) throw new Error("🚨 'itemId' is required")
+        const response = await this.baseClient.api<{ delete_item: { id: string } }>(
+            {
+                query: mondayGraphQLMutations.deleteItem,
+                variables: params
+            }
+        )
+        return response.delete_item.id
     }
 
     async updateItem(params: UpdateItemParams): Promise<string> {

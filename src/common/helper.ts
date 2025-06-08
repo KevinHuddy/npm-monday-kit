@@ -148,7 +148,9 @@ export const parseMondayColumnValue = (columnValue: ColumnValue) => {
             return columnValue.linked_item_ids ?? [];
         // TODO: Get array of titles by ids
         case MondayColumnType.DROPDOWN:
-            return JSON.parse(columnValue.value)?.ids ?? [];
+            return columnValue.text || null
+            // console.log(JSON.parse(columnValue.value))
+            // return JSON.parse(columnValue.value)?.text ?? [];
         case MondayColumnType.EMAIL:
             return JSON.parse(columnValue.value)?.email ?? null;
         case MondayColumnType.FILES: {
