@@ -34,12 +34,15 @@ export class SubitemService {
     }
 
     private async processColumnValues(
-        boardId: string, 
+        parentItemId: string, 
         columnValues: Record<string, any>
     ): Promise<Record<string, any>> {
         if (Object.keys(columnValues).length === 0) {
             return {}
         }
+
+        const boardId = await this.getSubitemBoardId(parentItemId)
+        if (!boardId) throw new Error("🚨 Subitem board not found, make sure to create a subitem in the board first")
 
         const columns = await this.listBoardColumns(boardId)
         const columnIdTypeMap = generateColumnIdTypeMap(columns)
@@ -62,6 +65,30 @@ export class SubitemService {
         }
 
         return mondayColumnValues
+    }
+
+    private async getSubitemBoardId(parentItemId: string): Promise<string | null> {
+        const response = await this.baseClient.api<{ items: { board: { columns: { settings_str: string }[] }[] }[] }>({
+            query: `query ($itemId: ID!)
+            {
+                items (ids: [$itemId]) 
+                {
+                    board 
+                    {
+                        columns (types: [subtasks]) {
+                            settings_str
+                        }
+                    }
+                }
+            }`,
+            variables: {
+                itemId: parentItemId
+            }
+        }).then((res: any) => {
+            const subtaskSettings = JSON.parse(res.items[0].board.columns?.[0]?.settings_str || '{}')
+            return subtaskSettings.boardIds?.[0] || null
+        })
+        return response
     }
 
     /**
@@ -110,7 +137,7 @@ export class SubitemService {
         return result;
     }
 
-    async createSubitem(params: CreateSubitemParams): Promise<string> {
+    async create(params: CreateSubitemParams): Promise<string> {
         if (!params.itemName) throw new Error("🚨 'itemName' is required")
         if (!params.parentItemId) throw new Error("🚨 'parentItemId' is required")
 
@@ -119,7 +146,7 @@ export class SubitemService {
             params.columnValues || {}
         )
 
-        const response = await this.baseClient.api<{ create_item: { id: string } }>(
+        const response = await this.baseClient.api<{ create_subitem: { id: string } }>(
             {
                 query: mondayGraphQLMutations.createSubitem,
                 variables: {
@@ -130,7 +157,7 @@ export class SubitemService {
                 }
             }
         )
-        return response.create_item.id
+        return response.create_subitem.id
     }
     
 } 

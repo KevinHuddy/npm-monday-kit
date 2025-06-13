@@ -41,7 +41,7 @@ export function convertValueToMondayValue(
         case MondayColumnType.DATE: {
             let datevalue = dayjs(value as unknown as string)
             if (!datevalue.isValid()) {
-                datevalue = dayjs()
+                return null
             }
             return {
                 date: datevalue.format('YYYY-MM-DD'),
