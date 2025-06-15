@@ -154,14 +154,14 @@ export const parseMondayColumnValue = (columnValue: ColumnValue) => {
         case MondayColumnType.EMAIL:
             return JSON.parse(columnValue.value)?.email ?? null;
         case MondayColumnType.FILES: {
-            return JSON.parse(columnValue.value).files.map(
+            return JSON.parse(columnValue.value)?.files?.map(
                 (file: { name: string, assetId?: string, fileId?:string, linkToFile?: string }) => ({
                     name: file.name,
                     assetId: file.assetId ?? null,
                     fileId: file.fileId ?? null,
                     linkToFile: file.linkToFile ?? null,
                 })
-            )
+            ) ?? []
         }
         case MondayColumnType.FORMULA: {
             return {
