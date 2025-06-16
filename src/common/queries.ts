@@ -34,9 +34,11 @@ fragment ColumnValuesFragment on ColumnValue
     }
     ... on BoardRelationValue {
         linked_item_ids
+        display_value
     }
     ... on DependencyValue {
         linked_item_ids
+        display_value
     }
     ... on WeekValue {
         start_date

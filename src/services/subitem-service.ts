@@ -3,6 +3,7 @@ import { mondayGraphQLQueries } from "../common/queries"
 import { Column, Item } from "../common/models"
 import { convertValueToMondayValue, generateColumnIdTypeMap, parseMondayColumnValue } from "../common/helper"
 import { mondayGraphQLMutations } from "../common/mutations"
+import { MondayColumnType, MondayNotWritableColumnType } from "../common/constants"
 
 export interface ListSubitemsParams {
     itemId: string,
@@ -60,6 +61,9 @@ export class SubitemService {
             const value = columnValues[key]
             if (value !== '' && value != null) {
                 const columnType = columnIdTypeMap[key]
+                if (MondayNotWritableColumnType.includes(columnType as MondayColumnType)) {
+                    continue
+                }
                 mondayColumnValues[key] = convertValueToMondayValue(columnType, value)
             }
         }
@@ -111,7 +115,7 @@ export class SubitemService {
         return columns
     }
 
-    async listSubitems(params: ListSubitemsParams): Promise<Subitems> {
+    async listSubitems(params: ListSubitemsParams, displayValue: boolean = false): Promise<Subitems> {
         if (!params.itemId) throw new Error("🚨 'itemId' is required")
 
         const response = await this.baseClient.api<{ items: Item[] }>(
@@ -130,7 +134,7 @@ export class SubitemService {
                 name: item.name,
             }
             for (const column of item.column_values) {
-                transformedValues[column.id] = parseMondayColumnValue(column)
+                transformedValues[column.id] = parseMondayColumnValue(column, displayValue)
             }
             result.push(transformedValues)
         }

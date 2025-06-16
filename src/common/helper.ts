@@ -39,6 +39,9 @@ export function convertValueToMondayValue(
                 item_ids: JSON.parse(JSON.stringify([value])),
             }
         case MondayColumnType.DATE: {
+            if (typeof value === 'object' && value !== null) {
+                return value
+            }
             let datevalue = dayjs(value as unknown as string)
             if (!datevalue.isValid()) {
                 return null
@@ -121,7 +124,7 @@ export function convertValueToMondayValue(
     }
 }
 
-export const parseMondayColumnValue = (columnValue: ColumnValue) => {
+export const parseMondayColumnValue = (columnValue: ColumnValue, displayValue: boolean = false) => {
     switch (columnValue.type) {
         case MondayColumnType.BUTTON:
             return columnValue.label;
@@ -130,7 +133,10 @@ export const parseMondayColumnValue = (columnValue: ColumnValue) => {
         case MondayColumnType.COLOR_PICKER:
             return JSON.parse(columnValue.value)?.color.hex ?? null;
         case MondayColumnType.BOARD_RELATION:
-            return columnValue.linked_item_ids ?? [];
+            return displayValue ? {
+                display_value: columnValue.display_value ?? '',
+                linked_item_ids: columnValue.linked_item_ids ?? []
+            } : columnValue.linked_item_ids
         case MondayColumnType.COUNTRY:
             return JSON.parse(columnValue.value)?.countryName ?? null;
         case MondayColumnType.CREATION_LOG:
@@ -229,6 +235,6 @@ export const parseMondayColumnValue = (columnValue: ColumnValue) => {
             }
         }
         case MondayColumnType.WORLD_CLOCK:
-            return columnValue.timezone ?? null;       
+            return columnValue.timezone ?? null;
     }
 }

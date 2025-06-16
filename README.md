@@ -614,6 +614,13 @@ ISC License
 - [Pipedream Documentation](https://pipedream.com/docs/)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
 
+## 🪵 Update Logs
+
+- **0.0.11**: Fixed a bug where it was crashing if there was no files in a file column when fetching item
+- **0.0.12**: Added the possibility to simply pass my own object to date format, when i dont want the time
+- **0.0.13**: Added the possibility to pass a props to show dipslay_value on connected columns and dependency.. Not sure about how I implemented this one 🤷. Feedback welcomed.
+- **0.0.14**: Filtered out unwrittable columns types from create queries so i can simply give .get() data to .create() seamlessly.  
+
 ---
 
 **Made with ❤️ by [NTR.DEV](https://ntr.dev)** for the automation community. 

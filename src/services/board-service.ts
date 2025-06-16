@@ -20,7 +20,7 @@ export interface ListBoardItemsParams {
 export class BoardService {
     constructor(private baseClient: Client) {}
 
-    private transformItems(items: Item[]): Items {
+    private transformItems(items: Item[], displayValue: boolean = false): Items {
         return items.map(item => {
             const transformedValues: Record<string, any> = {
                 id: item.id,
@@ -28,7 +28,7 @@ export class BoardService {
             }
             
             for (const column of item.column_values) {
-                transformedValues[column.id] = parseMondayColumnValue(column)
+                transformedValues[column.id] = parseMondayColumnValue(column, displayValue)
             }
             
             return transformedValues
@@ -61,7 +61,7 @@ export class BoardService {
         return response.boards[0]?.groups || []
     }
 
-    async listBoardItems(variables: ListBoardItemsParams): Promise<Items> {
+    async listBoardItems(variables: ListBoardItemsParams, displayValue: boolean = false): Promise<Items> {
         if (!variables.boardId) throw new Error("🚨 'boardId' is required")
 
         const response = await this.baseClient.api<{ boards: { items_page: { items: Item[] } }[] }>(
@@ -72,6 +72,6 @@ export class BoardService {
         )
 
         const items = response.boards[0]?.items_page?.items || []
-        return this.transformItems(items)
+        return this.transformItems(items, displayValue)
     }
 } 

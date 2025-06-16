@@ -34,7 +34,32 @@ export const enum MondayColumnType {
     VOTE = 'vote',
     WEEK = 'week',
     WORLD_CLOCK = 'world_clock',
+    SUBTASKS = 'subtasks',
+    PROGRESS = 'progress',
+    UNSUPPORTED = 'unsupported',
+    ID = 'id',
 }
+
+export const MondayNotWritableColumnType = [
+    MondayColumnType.UNSUPPORTED,
+    MondayColumnType.AUTO_NUMBER,
+    MondayColumnType.NAME,
+    MondayColumnType.COLOR_PICKER,
+    MondayColumnType.BUTTON,
+    MondayColumnType.MIRROR,
+    MondayColumnType.SUBTASKS,
+    MondayColumnType.ITEM_ID,
+    MondayColumnType.CREATION_LOG,
+    MondayColumnType.FILES,
+    MondayColumnType.FORMULA,
+    MondayColumnType.DOC,
+    MondayColumnType.LAST_UPDATED,
+    MondayColumnType.PROGRESS,
+    MondayColumnType.TAGS,
+    MondayColumnType.TIME_TRACKING,
+    MondayColumnType.VOTE,
+    MondayColumnType.ID,
+];
 
 export const enum BoardKind {
     PRIVATE = 'private',

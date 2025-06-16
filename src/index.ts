@@ -30,15 +30,15 @@ export class MondayClient {
     api = async <T>(params: ApiParams) => this.baseClient.api<T>(params)
 
     items = {
-        get: async (params: GetItemParams) => this.item.getItem(params),
+        get: async (params: GetItemParams, displayValue: boolean = false) => this.item.getItem(params, displayValue),
         update: async (params: UpdateItemParams) => this.item.updateItem(params),
         create: async (params: CreateItemParams) => this.item.createItem(params),
-        listByColumnValues: async (params: ListItemsByColumnValuesParams) => this.item.listItemsByColumnValues(params),
+        listByColumnValues: async (params: ListItemsByColumnValuesParams, displayValue: boolean = false) => this.item.listItemsByColumnValues(params, displayValue),
         delete: async (params: DeleteItemParams) => this.item.deleteItem(params)
     }
 
     subitems = {
-        list: async (params: ListSubitemsParams) => this.subitem.listSubitems(params)
+        list: async (params: ListSubitemsParams, displayValue: boolean = false) => this.subitem.listSubitems(params, displayValue)
     }
 
     updates = {

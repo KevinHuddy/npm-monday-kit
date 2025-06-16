@@ -3,6 +3,7 @@ import { mondayGraphQLQueries } from "../common/queries"
 import { mondayGraphQLMutations } from "../common/mutations"
 import { Column, Item } from "../common/models"
 import { convertValueToMondayValue, generateColumnIdTypeMap, parseMondayColumnValue } from "../common/helper"
+import { MondayColumnType, MondayNotWritableColumnType } from "../common/constants"
 
 export interface ListBoardColumnsParams {
     boardId: string
@@ -40,7 +41,7 @@ export class ItemService {
 
     constructor(private baseClient: Client) {}
 
-    async getItem(params: GetItemParams): Promise<Items> {
+    async getItem(params: GetItemParams, displayValue: boolean = false): Promise<Items> {
         if (!params.itemId) throw new Error("🚨 'itemId' is required")
             
         const response = await this.baseClient.api<{ items: Item[] }>(
@@ -50,7 +51,7 @@ export class ItemService {
             }
         )
         const items = response.items || []
-        return this.transformItems(items)
+        return this.transformItems(items, displayValue)
     }
     
     async createItem(params: CreateItemParams): Promise<string> {
@@ -112,7 +113,7 @@ export class ItemService {
         return response.change_multiple_column_values.id
     }
 
-    async listItemsByColumnValues(params: ListItemsByColumnValuesParams): Promise<Items> {
+    async listItemsByColumnValues(params: ListItemsByColumnValuesParams, displayValue: boolean = false): Promise<Items> {
         if (!params.boardId) throw new Error("🚨 'boardId' is required")
         if (!params.columns) throw new Error("🚨 'columns' is required")
             
@@ -132,13 +133,13 @@ export class ItemService {
         )
 
         const items = response.items_page_by_column_values.items || []
-        return this.transformItems(items)
+        return this.transformItems(items, displayValue)
     }
 
     /**
      * Transforms raw Monday.com items into a standardized format
      */
-    private transformItems(items: Item[]): Items {
+    private transformItems(items: Item[], displayValue: boolean = false): Items {
         return items.map(item => {
             const transformedValues: Record<string, any> = {
                 id: item.id,
@@ -146,7 +147,7 @@ export class ItemService {
             }
             
             for (const column of item.column_values) {
-                transformedValues[column.id] = parseMondayColumnValue(column)
+                transformedValues[column.id] = parseMondayColumnValue(column, displayValue)
             }
             
             return transformedValues
@@ -200,9 +201,14 @@ export class ItemService {
             const value = columnValues[key]
             if (value !== '' && value != null) {
                 const columnType = columnIdTypeMap[key]
+                if (MondayNotWritableColumnType.includes(columnType as MondayColumnType)) {
+                    continue
+                }
                 mondayColumnValues[key] = convertValueToMondayValue(columnType, value)
             }
         }
+        console.log("🚨", mondayColumnValues)
+        
 
         return mondayColumnValues
     }
