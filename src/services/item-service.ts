@@ -207,9 +207,6 @@ export class ItemService {
                 mondayColumnValues[key] = convertValueToMondayValue(columnType, value)
             }
         }
-        console.log("🚨", mondayColumnValues)
-        
-
         return mondayColumnValues
     }
 
@@ -220,7 +217,7 @@ export class ItemService {
         columnValues: Record<string, any>, 
         columnIdTypeMap: Record<string, string>
     ): { validKeys: string[], invalidKeys: string[] } {
-        const allKeys = Object.keys(columnValues)
+        const allKeys = Object.keys(columnValues).filter(key => key !== 'id')
         const validKeys = allKeys.filter(columnId => columnId in columnIdTypeMap)
         const invalidKeys = allKeys.filter(columnId => !(columnId in columnIdTypeMap))
         

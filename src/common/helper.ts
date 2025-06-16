@@ -66,6 +66,9 @@ export function convertValueToMondayValue(
                 text: value,
             };
         case MondayColumnType.LINK:
+            if (typeof value === 'object' && value !== null) {
+                return value
+            }
             return {
                 url: value,
                 text: value,

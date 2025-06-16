@@ -27,7 +27,7 @@ export class SubitemService {
         columnValues: Record<string, any>, 
         columnIdTypeMap: Record<string, string>
     ): { validKeys: string[], invalidKeys: string[] } {
-        const allKeys = Object.keys(columnValues)
+        const allKeys = Object.keys(columnValues).filter(key => key !== 'id')
         const validKeys = allKeys.filter(columnId => columnId in columnIdTypeMap)
         const invalidKeys = allKeys.filter(columnId => !(columnId in columnIdTypeMap))
         
@@ -132,6 +132,7 @@ export class SubitemService {
             const transformedValues: Record<string, any> = {
                 id: item.id,
                 name: item.name,
+                boardId: item.board.id
             }
             for (const column of item.column_values) {
                 transformedValues[column.id] = parseMondayColumnValue(column, displayValue)
