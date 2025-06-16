@@ -1,6 +1,6 @@
 import { ApiParams, Client } from "./common/client"
 import { CreateItemParams, GetItemParams, ListItemsByColumnValuesParams, ItemService, UpdateItemParams, DeleteItemParams } from "./services/item-service"
-import { ListSubitemsParams, SubitemService } from "./services/subitem-service"
+import { CreateSubitemParams, ListSubitemsParams, SubitemService } from "./services/subitem-service"
 import { BoardService, ListBoardColumnsParams, ListBoardGroupsParams, ListBoardItemsParams } from "./services/board-service"
 import { ListWorkspaceBoardsParams, WorkspaceService } from "./services/workspace-service"
 import { GetUserByEmailParams, GetUserByIdParams, UserService } from "./services/user-service"
@@ -38,7 +38,8 @@ export class MondayClient {
     }
 
     subitems = {
-        list: async (params: ListSubitemsParams, displayValue: boolean = false) => this.subitem.listSubitems(params, displayValue)
+        list: async (params: ListSubitemsParams, displayValue: boolean = false) => this.subitem.listSubitems(params, displayValue),
+        create: async (params: CreateSubitemParams) => this.subitem.createSubitem(params)
     }
 
     updates = {

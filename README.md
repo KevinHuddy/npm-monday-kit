@@ -620,6 +620,7 @@ ISC License
 - **0.0.12**: Added the possibility to simply pass my own object to date format, when i dont want the time
 - **0.0.13**: Added the possibility to pass a props to show dipslay_value on connected columns and dependency.. Not sure about how I implemented this one 🤷. Feedback welcomed.
 - **0.0.14**: Filtered out unwrittable columns types from create queries so i can simply give .get() data to .create() seamlessly.  
+- **0.0.15**: Possibility to create subitems
 
 ---
 

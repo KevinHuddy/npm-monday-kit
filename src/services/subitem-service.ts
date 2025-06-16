@@ -141,7 +141,7 @@ export class SubitemService {
         return result;
     }
 
-    async create(params: CreateSubitemParams): Promise<string> {
+    async createSubitem(params: CreateSubitemParams): Promise<string> {
         if (!params.itemName) throw new Error("🚨 'itemName' is required")
         if (!params.parentItemId) throw new Error("🚨 'parentItemId' is required")
 
