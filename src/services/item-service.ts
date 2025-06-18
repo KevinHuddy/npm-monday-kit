@@ -110,6 +110,8 @@ export class ItemService {
                 }
             }
         )
+        console.log(JSON.stringify(mondayColumnValues))
+        console.log(response)
         return response.change_multiple_column_values.id
     }
 
@@ -199,13 +201,11 @@ export class ItemService {
         const mondayColumnValues: Record<string, any> = {}
         for (const key of validKeys) {
             const value = columnValues[key]
-            if (value !== '' && value != null) {
-                const columnType = columnIdTypeMap[key]
-                if (MondayNotWritableColumnType.includes(columnType as MondayColumnType)) {
-                    continue
-                }
-                mondayColumnValues[key] = convertValueToMondayValue(columnType, value)
+            const columnType = columnIdTypeMap[key]
+            if (MondayNotWritableColumnType.includes(columnType as MondayColumnType)) {
+                continue
             }
+            mondayColumnValues[key] = convertValueToMondayValue(columnType, value)
         }
         return mondayColumnValues
     }

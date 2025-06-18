@@ -115,7 +115,7 @@ export function convertValueToMondayValue(
                 label: value as string,
             };
         case MondayColumnType.TEXT:
-            return value ?? null;
+            return value
         case MondayColumnType.TIMELINE:
             const values = (value as string).split(':')
             return {
@@ -189,7 +189,7 @@ export const parseMondayColumnValue = (columnValue: ColumnValue, displayValue: b
         case MondayColumnType.LOCATION:
             return null;
         case MondayColumnType.LONG_TEXT:
-            return JSON.parse(columnValue.value)?.text ?? null;
+            return JSON.parse(columnValue.value)?.text
         case MondayColumnType.MIRROR:
             return columnValue.display_value ?? null;
         case MondayColumnType.DOC:
