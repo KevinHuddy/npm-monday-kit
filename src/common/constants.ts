@@ -43,7 +43,6 @@ export const enum MondayColumnType {
 export const MondayNotWritableColumnType = [
     MondayColumnType.UNSUPPORTED,
     MondayColumnType.AUTO_NUMBER,
-    MondayColumnType.NAME,
     MondayColumnType.COLOR_PICKER,
     MondayColumnType.BUTTON,
     MondayColumnType.MIRROR,
