@@ -621,6 +621,7 @@ ISC License
 - **0.0.13**: Added the possibility to pass a props to show dipslay_value on connected columns and dependency.. Not sure about how I implemented this one 🤷. Feedback welcomed.
 - **0.0.14**: Filtered out unwrittable columns types from create queries so i can simply give .get() data to .create() seamlessly.  
 - **0.0.15**: Possibility to create subitems
+- **0.0.20**: Fixed a bug where my helpers were stopping me from clearing text column 😇 probably way more columns to fix for clear, will deep dive later.
 
 ---
 

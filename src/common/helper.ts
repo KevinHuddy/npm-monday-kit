@@ -83,7 +83,7 @@ export function convertValueToMondayValue(
         }
         case MondayColumnType.LONG_TEXT:
             return {
-                text: value,
+                text: value ?? null,
             };
         case MondayColumnType.NUMBERS:
             return Number(String(value));
@@ -115,7 +115,7 @@ export function convertValueToMondayValue(
                 label: value as string,
             };
         case MondayColumnType.TEXT:
-            return value;
+            return value ?? null;
         case MondayColumnType.TIMELINE:
             const values = (value as string).split(':')
             return {
