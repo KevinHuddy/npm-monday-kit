@@ -201,11 +201,15 @@ export class ItemService {
         const mondayColumnValues: Record<string, any> = {}
         for (const key of validKeys) {
             const value = columnValues[key]
+            
             const columnType = columnIdTypeMap[key]
             if (MondayNotWritableColumnType.includes(columnType as MondayColumnType)) {
                 continue
             }
-            mondayColumnValues[key] = convertValueToMondayValue(columnType, value)
+            mondayColumnValues[key] = 
+                (value == '' || value == null) 
+                ? null 
+                : convertValueToMondayValue(columnType, value)
         }
         return mondayColumnValues
     }
