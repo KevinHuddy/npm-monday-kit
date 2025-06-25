@@ -1,4 +1,4 @@
-import { ApiParams, Client, StorageParams } from "./common/client"
+import { ApiParams, Client } from "./common/client"
 import { CreateItemParams, GetItemParams, ListItemsByColumnValuesParams, ItemService, UpdateItemParams, DeleteItemParams } from "./services/item-service"
 import { CreateSubitemParams, ListSubitemsParams, SubitemService } from "./services/subitem-service"
 import { BoardService, ListBoardColumnsParams, ListBoardGroupsParams, ListBoardItemsParams } from "./services/board-service"
@@ -28,9 +28,6 @@ export class MondayClient {
 
     // Base Client
     api = async <T>(params: ApiParams) => this.baseClient.api<T>(params)
-    storage = async <T>(params: StorageParams) => this.baseClient.storage<T>(params)
-
-
 
     items = {
         get: async (params: GetItemParams, displayValue: boolean = false) => this.item.getItem(params, displayValue),
