@@ -1,13 +1,13 @@
 {
     "files.exclude": {
-        "dist": true,
-        "node_modules": true,
-        ".vscode": true,
-        ".quokka": true,
-        "bun.lockb": true,
-        ".gitignore": true,
-        "tsconfig.json": true,
-        "tsup.config.ts": true,
-        ".npmignore": true
+        "dist": false,
+        "node_modules": false,
+        ".vscode": false,
+        ".quokka": false,
+        "bun.lockb": false,
+        ".gitignore": false,
+        "tsconfig.json": false,
+        "tsup.config.ts": false,
+        ".npmignore": false
     }
 }

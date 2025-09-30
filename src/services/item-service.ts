@@ -18,6 +18,26 @@ export interface ListItemsByColumnValuesParams {
     limit?: number,
     columnIds?: string[]
 }
+export interface ItemsQueryRule {
+    column_id: string,
+    compare_value?: any[],
+    compare_attribute?: string,
+    operator?: string
+}
+export interface ListItemsByQueryParamsParams {
+    boardId: string,
+    queryParams?: {
+        rules?: ItemsQueryRule[],
+        operator?: 'and' | 'or',
+        order_by?: Array<{
+            column_id: string,
+            direction?: 'asc' | 'desc'
+        }>
+    },
+    limit?: number,
+    cursor?: string,
+    columnIds?: string[]
+}
 export interface CreateItemParams {
     itemName: string,
     boardId: string,
@@ -110,15 +130,13 @@ export class ItemService {
                 }
             }
         )
-        console.log(JSON.stringify(mondayColumnValues))
-        console.log(response)
         return response.change_multiple_column_values.id
     }
 
     async listItemsByColumnValues(params: ListItemsByColumnValuesParams, displayValue: boolean = false): Promise<Items> {
         if (!params.boardId) throw new Error("🚨 'boardId' is required")
         if (!params.columns) throw new Error("🚨 'columns' is required")
-            
+
         const response = await this.baseClient.api<{ items_page_by_column_values: { items: Item[] } }>(
             {
                 query: mondayGraphQLQueries.listItemsByColumnValues,
@@ -136,6 +154,30 @@ export class ItemService {
 
         const items = response.items_page_by_column_values.items || []
         return this.transformItems(items, displayValue)
+    }
+
+    async listItemsByQueryParams(params: ListItemsByQueryParamsParams, displayValue: boolean = false): Promise<{ items: Items, cursor?: string }> {
+        if (!params.boardId) throw new Error("🚨 'boardId' is required")
+
+        const response = await this.baseClient.api<{ boards: Array<{ items_page: { items: Item[], cursor?: string } }> }>(
+            {
+                query: mondayGraphQLQueries.listItemsByQueryParams,
+                variables: {
+                    boardId: params.boardId,
+                    queryParams: params.queryParams,
+                    limit: params.limit,
+                    cursor: params.cursor,
+                    columnIds: params.columnIds
+                }
+            }
+        )
+
+        const itemsPage = response.boards[0]?.items_page
+        const items = itemsPage?.items || []
+        return {
+            items: this.transformItems(items, displayValue),
+            cursor: itemsPage?.cursor
+        }
     }
 
     /**

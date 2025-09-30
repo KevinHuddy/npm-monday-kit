@@ -73,6 +73,15 @@ fragment UserFragment on User
 }`;
 
 export const mondayGraphQLQueries = {
+    listBoards: `
+    query listBoards 
+    {
+        boards(limit: 500) 
+        {
+            id
+            name
+        }
+    }`,
     listWorkspaces: `
     query listWorkspaces ($limit: Int) 
     {
@@ -92,10 +101,28 @@ export const mondayGraphQLQueries = {
             type
         }
     }`,
+    listNextItems: `
+    ${columnValuesFragment}
+    query listNextItems($cursor: String!, $columnIds: [String!]) {
+        next_items_page(limit: 500, cursor: $cursor) {
+            cursor
+            items {
+                id
+                name
+                board { id }
+                column_values(ids: $columnIds) {
+                    ...ColumnValuesFragment
+                }
+            }
+        }
+    }`,
     listBoardItems: `
     ${columnValuesFragment}
-    query listBoardItems($boardId: ID!, $columnIds: [String!]) 
+    query listBoardItems($boardId: ID!, $columnIds: [String!])
     {
+        complexity {
+            query
+        }
         boards(ids: [$boardId])
         {
             items_page(limit: 500)
@@ -220,13 +247,13 @@ export const mondayGraphQLQueries = {
     getItemByQueryParams: `
     ${columnValuesFragment}
     query getItemByQueryParams(
-        $boardId: ID!, 
-        $limit: Int, 
+        $boardId: ID!,
+        $limit: Int,
         $rules: [Rule!]
         $columnIds: [String!]
     )
     {
-        boards(ids: [$boardId]) 
+        boards(ids: [$boardId])
         {
             items_page(
                 limit: $limit,
@@ -235,6 +262,36 @@ export const mondayGraphQLQueries = {
                 }
             )
             {
+                items {
+                    id
+                    name
+                    board { id }
+                    column_values(ids: $columnIds) {
+                        ...ColumnValuesFragment
+                    }
+                }
+            }
+        }
+    }`,
+    listItemsByQueryParams: `
+    ${columnValuesFragment}
+    query listItemsByQueryParams(
+        $boardId: ID!,
+        $limit: Int,
+        $cursor: String,
+        $queryParams: ItemsQuery,
+        $columnIds: [String!]
+    )
+    {
+        boards(ids: [$boardId])
+        {
+            items_page(
+                limit: $limit,
+                cursor: $cursor,
+                query_params: $queryParams
+            )
+            {
+                cursor
                 items {
                     id
                     name

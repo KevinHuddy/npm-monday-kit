@@ -9,9 +9,9 @@ export interface ApiParams {
 export class Client {
     private client: MondayClientSdk
 
-    constructor(apiKey: string, apiVersion: string = "2025-04") {
+    constructor(apiKey?: string, apiVersion: string = "2025-04") {
         this.client = mondaySdk()
-        this.client.setToken(apiKey)
+        apiKey && this.client.setToken(apiKey)
         this.client.setApiVersion(apiVersion)
     }
 

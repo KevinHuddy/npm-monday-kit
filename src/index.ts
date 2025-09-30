@@ -16,7 +16,7 @@ export class MondayClient {
     public readonly update: UpdateService
     public readonly subitem: SubitemService
 
-    constructor(apiKey: string, apiVersion: string = "2025-04") {
+    constructor(apiKey?: string, apiVersion: string = "2025-04") {
         this.baseClient = new Client(apiKey, apiVersion)
         this.item = new ItemService(this.baseClient)
         this.subitem = new SubitemService(this.baseClient)
@@ -34,7 +34,7 @@ export class MondayClient {
         update: async (params: UpdateItemParams) => this.item.updateItem(params),
         create: async (params: CreateItemParams) => this.item.createItem(params),
         listByColumnValues: async (params: ListItemsByColumnValuesParams, displayValue: boolean = false) => this.item.listItemsByColumnValues(params, displayValue),
-        delete: async (params: DeleteItemParams) => this.item.deleteItem(params)
+        delete: async (params: DeleteItemParams) => this.item.deleteItem(params),
     }
 
     subitems = {
@@ -58,6 +58,7 @@ export class MondayClient {
     }
 
     boards = {
+        list: async () => this.board.listBoards(),
         listColumns: async (params: ListBoardColumnsParams) => this.board.listBoardColumns(params),
         listGroups: async (params: ListBoardGroupsParams) => this.board.listBoardGroups(params),
         listItems: async (params: ListBoardItemsParams) => this.board.listBoardItems(params)

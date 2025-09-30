@@ -1,6 +1,6 @@
 import { Client } from "../common/client"
 import { mondayGraphQLQueries } from "../common/queries"
-import { Column, Group, Item } from "../common/models"
+import { Board, Column, Group, Item } from "../common/models"
 import { parseMondayColumnValue } from "../common/helper"
 import { Items } from "./item-service"
 
@@ -15,6 +15,7 @@ export interface ListBoardGroupsParams {
 export interface ListBoardItemsParams {
     boardId: string,
     columnIds?: string[]
+    all?: boolean
 }
 
 export class BoardService {
@@ -33,6 +34,16 @@ export class BoardService {
             
             return transformedValues
         })
+    }
+
+    async listBoards(): Promise<Board[]> {
+        const response = await this.baseClient.api<{ boards: Board[] }>(
+            {
+                query: mondayGraphQLQueries.listBoards,
+            }
+        )
+
+        return response.boards || []
     }
 
     async listBoardColumns(variables: ListBoardColumnsParams): Promise<Column[]> {
@@ -63,6 +74,37 @@ export class BoardService {
 
     async listBoardItems(variables: ListBoardItemsParams, displayValue: boolean = false): Promise<Items> {
         if (!variables.boardId) throw new Error("🚨 'boardId' is required")
+
+        if (variables.all) {
+            let allItems = []
+            let currentCursor: string | null = null
+
+            const firstPage = await this.baseClient.api<{ boards: { items_page: { items: Item[], cursor: string } }[], complexity: { query: number } }>(
+                {
+                    query: mondayGraphQLQueries.listBoardItems,
+                    variables
+                }
+            )
+            console.log(firstPage.complexity)
+            allItems.push(...firstPage.boards?.[0]?.items_page?.items || [])
+            currentCursor = firstPage.boards?.[0]?.items_page?.cursor || null
+
+            while (currentCursor) {
+                const nextPage = await this.baseClient.api<{ next_items_page: { items: Item[], cursor: string } }>(
+                    {
+                        query: mondayGraphQLQueries.listNextItems,
+                        variables: {
+                            cursor: currentCursor,
+                            ...variables
+                        }
+                    }
+                )
+                allItems.push(...nextPage.next_items_page?.items || [])
+                currentCursor = nextPage.next_items_page?.cursor || null
+            }
+
+            return this.transformItems(allItems, displayValue)
+        }
 
         const response = await this.baseClient.api<{ boards: { items_page: { items: Item[] } }[] }>(
             {

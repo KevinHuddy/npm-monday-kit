@@ -27,7 +27,6 @@ export function convertValueToMondayValue(
             };
         case MondayColumnType.BOARD_RELATION:
         case MondayColumnType.DEPENDENCY:
-            console.log( value )
             if (Array.isArray(value)) {
                 return {
                     item_ids: JSON.parse(JSON.stringify(value as unknown as string[])),
