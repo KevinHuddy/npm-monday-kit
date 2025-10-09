@@ -1,7 +1,7 @@
 {
     "name": "@ntr.dev/monday-kit",
     "description": "A simplified wrapper for the Monday.com SDK with built-in column value parsing",
-    "version": "0.0.36",
+    "version": "0.0.37",
     "author": "NTR.DEV",
     "type": "module",
     "main": "./dist/index.js",

@@ -22,6 +22,7 @@ export const mondayGraphQLMutations = {
         $parentItemId: ID!
         $itemName: String!
         $columnValues: JSON
+        $createLabels: Boolean
     ) {
         create_subitem(
             parent_item_id: $parentItemId
