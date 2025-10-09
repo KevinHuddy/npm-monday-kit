@@ -83,6 +83,12 @@ export class ItemService {
             params.columnValues || {}
         )
 
+        console.log(
+            {
+                mondayColumnValues
+            }
+        )
+
         const response = await this.baseClient.api<{ create_item: { id: string } }>(
             {
                 query: mondayGraphQLMutations.createItem,
@@ -95,6 +101,13 @@ export class ItemService {
                 }
             }
         )
+
+        console.log(
+            {
+                response
+            }
+        )
+
         return response.create_item.id
     }
 
