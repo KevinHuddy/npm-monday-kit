@@ -27,6 +27,7 @@ export const mondayGraphQLMutations = {
             parent_item_id: $parentItemId
             item_name: $itemName
             column_values: $columnValues
+            create_labels_if_missing: $createLabels
         ) {
             id
             board {
@@ -46,6 +47,7 @@ export const mondayGraphQLMutations = {
             board_id: $boardId
             column_values: $columnValues
             create_labels_if_missing: $createLabels
+            createLabels
         ) {
             id
             name
